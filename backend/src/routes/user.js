@@ -35,7 +35,10 @@ userRouter.post("/user", validateUser, async (req, res) => {
 userRouter.get("/users", async (req, res) => {
   try {
     const users = await User.find();
-    res.json({ data: users });
+    if (users.length == 0) {
+      return res.json({ message: "No users found" });
+    }
+    res.json(users);
   } catch (error) {
     res.status(400).send("Something went wrong when fetching all users");
   }
@@ -54,6 +57,21 @@ userRouter.get("/user/:userId", async (req, res) => {
     res
       .status(400)
       .json({ message: "Something went wrong when fetching the user", error });
+  }
+});
+
+userRouter.delete("/user/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const deletedUser = await User.findOneAndDelete(userId);
+    if (!deletedUser) {
+      return res.status(404).json({ message: "User does not exist" });
+    }
+    res.json(deletedUser);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Something went wrong when deleting the user", error });
   }
 });
 
