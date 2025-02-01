@@ -1,9 +1,16 @@
 const express = require("express");
 const User = require("../models/user");
+const { validationResult } = require("express-validator");
+const validateUser = require("../utils/validation");
 const userRouter = express.Router();
 
 //create a user
-userRouter.post("/user", async (req, res) => {
+userRouter.post("/user", validateUser, async (req, res) => {
+  //payload validation
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
   try {
     const { firstName, lastName, interest, age, email, mobile } = req.body;
 
@@ -18,7 +25,9 @@ userRouter.post("/user", async (req, res) => {
     await user.save();
     res.json({ message: "User added successfully", data: user });
   } catch (error) {
-    res.status(400).send("Errror:" + error.message);
+    res
+      .status(400)
+      .send("Something went wrong when creating a user:" + error.message);
   }
 });
 
