@@ -1,10 +1,16 @@
-require('dotenv').config()
+require("dotenv").config();
 const express = require("express");
 const app = express();
+const cors = require('cors')
 const connectDB = require("./config/database");
 const userRouter = require("./Routes/user");
 
-app.use(express.json())
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  })
+);
+app.use(express.json());
 app.use("/", userRouter);
 
 connectDB()

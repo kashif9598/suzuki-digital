@@ -15,6 +15,7 @@ const userSchema = new Schema(
       minLength: 1,
       maxLength: 50,
       trim: true,
+      required: true,
     },
     interest: {
       type: [String],

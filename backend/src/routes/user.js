@@ -60,10 +60,36 @@ userRouter.get("/user/:userId", async (req, res) => {
   }
 });
 
+userRouter.patch("/user/:userId", validateUser, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+  try {
+    const userId = req.params.userId;
+    const existingUser = await User.findById(userId);
+    console.log(existingUser)
+    Object.keys(req.body).forEach(
+      (field) => (existingUser[field] = req.body[field])
+    );
+    const updatedUser = await User.findByIdAndUpdate(
+      existingUser._id,
+      existingUser,
+      {
+        returnDocument: "after",
+        runValidators: true,
+      }
+    );
+    res.status(200).json({ message: "Update successfull", data: updatedUser });
+  } catch (error) {
+    res.status(400).send("ERROR: " + error.message);
+  }
+});
+
 userRouter.delete("/user/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const deletedUser = await User.findOneAndDelete(userId);
+    const deletedUser = await User.findOneAndDelete({_id:userId});
     if (!deletedUser) {
       return res.status(404).json({ message: "User does not exist" });
     }
