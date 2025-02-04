@@ -23,23 +23,31 @@ const UserDetails = () => {
       if (!validateInputData(updatedData)) {
         throw new Error("Invalid data");
       }
-      await fetch(`http://localhost:5000/user/${id}`, {
+      const res = await fetch(`http://localhost:5000/user/${id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(updatedData),
       });
+      const data = await res.json();
+      if(!res.ok){
+        if(Array.isArray(data.errors)){
+          const errorMessages = data.errors.map(err => err.msg).join("\n")
+          throw new Error(errorMessages)
+        }
+        throw new Error(data.error || "Something went wrong when updating the user")
+      }
       navigate("/users-list");
     } catch (error) {
-      alert("Something went wrong when editing the user", error.message);
+      alert(error.message);
     }
   };
 
   const handleDelete = async () => {
     try {
       const confirmDelete = window.confirm(
-        "Are you sure you want to delete this user?"
+        `Are you sure you want to delete ${userDetail.firstName}?`
       );
 
       if (!confirmDelete) return;
@@ -57,7 +65,7 @@ const UserDetails = () => {
       initialData={userDetail}
       onSubmit={handleSubmit}
       onDelete={handleDelete}
-      isEditModeProp={false}
+      isEditModeProp={true}
     />
   ) : (
     <p>Loading...</p>

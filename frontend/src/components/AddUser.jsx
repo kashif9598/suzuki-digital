@@ -30,7 +30,7 @@ const AddUser = () => {
     }
   };
 
-  return <UserForm onSubmit={handleSubmit} isEditModeProp={true} />;
+  return <UserForm onSubmit={handleSubmit} isEditModeProp={false} />;
 };
 
 export default AddUser;

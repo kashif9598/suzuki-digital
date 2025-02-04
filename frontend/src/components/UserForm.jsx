@@ -18,6 +18,7 @@ const UserForm = ({
   });
   const [interestInput, setInterestInput] = useState("");
   const [isEditMode, setIsEditMode] = useState(isEditModeProp);
+  const [errors, setErrors] = useState({});
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -30,10 +31,13 @@ const UserForm = ({
       ...prev,
       [name]: name === "age" || name === "mobile" ? Number(value) : value,
     }));
+
+    if (errors[name]) {
+      setErrors((prev) => ({ ...prev, [name]: "" }));
+    }
   };
 
   const handleAddInterest = (e) => {
-    console.log(interestInput);
     if (
       e.key === "Enter" &&
       interestInput.trim() !== "" &&
@@ -58,12 +62,50 @@ const UserForm = ({
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    onSubmit(user);
-    setIsEditMode(false)
+    if (validate()) {
+      onSubmit(user);
+      setIsEditMode(false);
+    }
   };
 
   const handleBack = () => {
     navigate("/users-list");
+  };
+
+  const handleInterestChange = (e) => {
+    const {name, value} = e.target
+    setInterestInput(value)
+    if (errors[name]) {
+        setErrors((prev) => ({ ...prev, [name]: "" }));
+      }
+  }
+
+  const validate = () => {
+    let newErrors = {};
+
+    if (!user.firstName.trim()) newErrors.firstName = "First name is required";
+    if (!user.lastName.trim()) newErrors.lastName = "Last name is required";
+    if (!user.email.trim()) {
+      newErrors.email = "Email is required";
+    } else if (!/\S+@\S+\.\S+/.test(user.email)) {
+      newErrors.email = "Invalid email format";
+    }
+    if (!user.age) {
+      newErrors.age = "Age is required";
+    } else if (isNaN(user.age) || user.age <= 17 || user.age>100) {
+      newErrors.age = "Enter a valid age";
+    }
+    if (!user.mobile) {
+      newErrors.mobile = "Phone number is required";
+    } else if (!/^\d{10}$/.test(user.mobile)) {
+      newErrors.mobile = "Phone number must be 10 digits";
+    }
+    if(user.interest.length<1){
+        newErrors.interest = "Atleast one Interest is required"
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
   };
 
   return (
@@ -79,7 +121,7 @@ const UserForm = ({
                 <>
                   <button
                     className="btn btn-xs btn-accent"
-                    onClick={() => setIsEditMode(true)}
+                    onClick={() => setIsEditMode(false)}
                   >
                     Edit
                   </button>
@@ -103,9 +145,12 @@ const UserForm = ({
                 className="grow"
                 value={user.firstName}
                 onChange={handleChange}
-                readOnly={!isEditMode}
+                readOnly={isEditMode}
               />
             </label>
+            {errors.firstName && (
+              <p className="text-red-500">{errors.firstName}</p>
+            )}
             <label className="input input-bordered flex items-center gap-2">
               Last Name
               <input
@@ -114,9 +159,12 @@ const UserForm = ({
                 className="grow"
                 value={user.lastName}
                 onChange={handleChange}
-                readOnly={!isEditMode}
+                readOnly={isEditMode}
               />
             </label>
+            {errors.lastName && (
+              <p className="text-red-500">{errors.lastName}</p>
+            )}
             <label className="input input-bordered flex items-center gap-2">
               Age
               <input
@@ -125,9 +173,10 @@ const UserForm = ({
                 className="grow"
                 value={user.age}
                 onChange={handleChange}
-                readOnly={!isEditMode}
+                readOnly={isEditMode}
               />
             </label>
+            {errors.age && <p className="text-red-500">{errors.age}</p>}
             <label className="input input-bordered flex items-center gap-2">
               Email ID
               <input
@@ -136,9 +185,10 @@ const UserForm = ({
                 className="grow"
                 value={user.email}
                 onChange={handleChange}
-                readOnly={!isEditMode}
+                readOnly={isEditMode}
               />
             </label>
+            {errors.email && <p className="text-red-500">{errors.email}</p>}
             <label className="input input-bordered flex items-center gap-2">
               Contact No.
               <input
@@ -147,21 +197,25 @@ const UserForm = ({
                 className="grow"
                 value={user.mobile}
                 onChange={handleChange}
-                readOnly={!isEditMode}
+                readOnly={isEditMode}
               />
             </label>
-            {isEditMode && <div className="flex justify-between">
-              <label className="input input-bordered flex items-center gap-2 h-auto">
-                Press Enter to add Interests
-                <input
-                  type="text"
-                  className="grow"
-                  value={interestInput}
-                  onChange={(e) => setInterestInput(e.target.value)}
-                  onKeyDown={handleAddInterest}
-                />
-              </label>
-            </div>}
+            {errors.mobile && <p className="text-red-500">{errors.mobile}</p>}
+            {!isEditMode && (
+              <div className="flex justify-between">
+                <label className="input input-bordered flex items-center gap-2 h-auto">
+                  Press Enter to add Interests
+                  <input
+                    type="text"
+                    className="grow"
+                    name="interest"
+                    value={interestInput}
+                    onChange={handleInterestChange}
+                    onKeyDown={handleAddInterest}
+                  />
+                </label>
+              </div>
+            )}
             {user.interest && (
               <div className="flex flex-wrap gap-2">
                 {user.interest.map((interest, index) => (
@@ -170,19 +224,22 @@ const UserForm = ({
                     className="badge badge-primary cursor-pointer"
                   >
                     {interest}
-                    {isEditMode && <span
-                      className="ml-2 text-sm text-red-600"
-                      onClick={() => handleRemoveInterest(interest)}
-                    >
-                      ❌
-                    </span>}
+                    {!isEditMode && (
+                      <span
+                        className="ml-2 text-sm text-red-600"
+                        onClick={() => handleRemoveInterest(interest)}
+                      >
+                        ❌
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>
             )}
+            {errors.interest && <p className="text-red-500">{errors.interest}</p>}
             <div className="card-actions justify-center">
               <button className="btn btn-primary" onClick={handleSubmit}>
-                {isEditMode ? 'Save Changes' : 'Add User'}
+                {isEditMode ? "Save Changes" : "Add User"}
               </button>
             </div>
           </div>
