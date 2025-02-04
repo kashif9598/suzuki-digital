@@ -25,9 +25,14 @@ userRouter.post("/user", validateUser, async (req, res) => {
     await user.save();
     res.json({ message: "User added successfully", data: user });
   } catch (error) {
+    if (error.code === 11000) {
+      return res
+        .status(400)
+        .json({error: "User already exists with this email/phone number"});
+    }
     res
-      .status(400)
-      .send("Something went wrong when creating a user:" + error.message);
+      .status(500)
+      .json({error: "Something went wrong when creating a user"});
   }
 });
 
@@ -68,7 +73,9 @@ userRouter.patch("/user/:userId", validateUser, async (req, res) => {
   try {
     const userId = req.params.userId;
     const existingUser = await User.findById(userId);
-    console.log(existingUser)
+    if(!existingUser){
+      return res.status(404).json({error: "No User Found"})
+    }
     Object.keys(req.body).forEach(
       (field) => (existingUser[field] = req.body[field])
     );
@@ -89,7 +96,7 @@ userRouter.patch("/user/:userId", validateUser, async (req, res) => {
 userRouter.delete("/user/:userId", async (req, res) => {
   try {
     const userId = req.params.userId;
-    const deletedUser = await User.findOneAndDelete({_id:userId});
+    const deletedUser = await User.findOneAndDelete({ _id: userId });
     if (!deletedUser) {
       return res.status(404).json({ message: "User does not exist" });
     }

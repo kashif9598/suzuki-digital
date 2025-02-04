@@ -24,7 +24,7 @@ const UsersList = () => {
 
   return (
     <div className="flex justify-center my-20">
-      <div className="card w-2/3 shadow-xl flex">
+      <div className="card w-2/3 shadow-xl flex bg-slate-800">
         <div className="card-body">
           <div className="flex justify-between">
             <button className="btn btn-primary" onClick={handleBack}>

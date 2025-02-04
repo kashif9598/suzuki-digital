@@ -1,10 +1,10 @@
 import { useNavigate } from "react-router-dom";
 
 const Body = () => {
-    const navigate = useNavigate();
-    const handleClick = () => {
-      navigate("/users-list");
-    };
+  const navigate = useNavigate();
+  const handleClick = () => {
+    navigate("/users-list");
+  };
   return (
     <div className="hero bg-base-200 min-h-screen">
       <div className="hero-content text-center">
@@ -13,7 +13,9 @@ const Body = () => {
           <p className="py-6">
             Click the button to view, add or delete the users from the list.
           </p>
-          <button className="btn btn-primary" onClick={handleClick}>Click to enter</button>
+          <button className="btn btn-primary" onClick={handleClick}>
+            Click to enter
+          </button>
         </div>
       </div>
     </div>
